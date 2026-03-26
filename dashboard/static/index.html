@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Polybot2 Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="logo">🤖 Polybot2</div>
+    <a href="#overview" class="nav-link active" data-section="overview">Overview</a>
+    <a href="#bets" class="nav-link" data-section="bets">Bets</a>
+    <a href="#research" class="nav-link" data-section="research">Research</a>
+    <a href="#learning" class="nav-link" data-section="learning">Learning</a>
+    <a href="#tokens" class="nav-link" data-section="tokens">Token Usage</a>
+    <div class="refresh-btn" onclick="refreshAll()">↻ Refresh</div>
+  </nav>
+
+  <main class="content">
+
+    <!-- OVERVIEW -->
+    <section id="overview" class="section active">
+      <h1>Overview</h1>
+      <div class="stat-grid" id="stat-grid">
+        <div class="stat-card"><div class="stat-label">Total Value</div><div class="stat-value" id="stat-total">—</div></div>
+        <div class="stat-card"><div class="stat-label">Cash Balance</div><div class="stat-value" id="stat-cash">—</div></div>
+        <div class="stat-card"><div class="stat-label">ROI</div><div class="stat-value" id="stat-roi">—</div></div>
+        <div class="stat-card"><div class="stat-label">Win Rate</div><div class="stat-value" id="stat-wr">—</div></div>
+        <div class="stat-card"><div class="stat-label">Open Bets</div><div class="stat-value" id="stat-open">—</div></div>
+        <div class="stat-card"><div class="stat-label">Realized P&amp;L</div><div class="stat-value" id="stat-pnl">—</div></div>
+      </div>
+      <div class="chart-container">
+        <canvas id="portfolioChart"></canvas>
+      </div>
+    </section>
+
+    <!-- BETS -->
+    <section id="bets" class="section">
+      <h1>Bets</h1>
+      <div class="filter-bar">
+        <select id="bet-status-filter" onchange="loadBets()">
+          <option value="">All Statuses</option>
+          <option value="open">Open</option>
+          <option value="resolved_win">Won</option>
+          <option value="resolved_loss">Lost</option>
+        </select>
+        <select id="bet-category-filter" onchange="loadBets()">
+          <option value="">All Categories</option>
+          <option value="politics">Politics</option>
+          <option value="crypto">Crypto</option>
+          <option value="sports">Sports</option>
+          <option value="finance">Finance</option>
+          <option value="world">World</option>
+          <option value="science">Science</option>
+          <option value="entertainment">Entertainment</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table id="bets-table">
+          <thead>
+            <tr>
+              <th>Market</th>
+              <th>Side</th>
+              <th>Amount</th>
+              <th>Entry</th>
+              <th>Model Prob</th>
+              <th>Edge</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>P&amp;L</th>
+              <th>Placed</th>
+            </tr>
+          </thead>
+          <tbody id="bets-body"></tbody>
+        </table>
+      </div>
+      <!-- Bet detail panel -->
+      <div id="bet-detail" class="detail-panel hidden">
+        <button onclick="closeBetDetail()" class="close-btn">✕ Close</button>
+        <div id="bet-detail-content"></div>
+      </div>
+    </section>
+
+    <!-- RESEARCH -->
+    <section id="research" class="section">
+      <h1>Research Log</h1>
+      <div class="table-wrap">
+        <table id="markets-table">
+          <thead>
+            <tr>
+              <th>Market</th>
+              <th>Category</th>
+              <th>YES Price</th>
+              <th>Volume 24h</th>
+              <th>Research Tier</th>
+              <th>Last Seen</th>
+            </tr>
+          </thead>
+          <tbody id="markets-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- LEARNING -->
+    <section id="learning" class="section">
+      <h1>Learning &amp; Calibration</h1>
+      <div class="two-col">
+        <div>
+          <h2>Current Strategy Parameters</h2>
+          <table id="params-table" class="kv-table">
+            <tbody id="params-body"></tbody>
+          </table>
+        </div>
+        <div>
+          <h2>Calibration Chart</h2>
+          <p class="hint">Red line = perfect calibration. Bars = actual win rate.</p>
+          <div class="chart-container small">
+            <canvas id="calibrationChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <h2>Category Performance</h2>
+      <div class="chart-container small">
+        <canvas id="categoryChart"></canvas>
+      </div>
+      <h2>Parameter Change History</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>When</th><th>Parameter</th><th>Old</th><th>New</th><th>Reason</th></tr></thead>
+          <tbody id="history-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TOKENS -->
+    <section id="tokens" class="section">
+      <h1>Token Usage</h1>
+      <div class="stat-grid" id="token-stats">
+        <div class="stat-card"><div class="stat-label">Today Used</div><div class="stat-value" id="tok-used">—</div></div>
+        <div class="stat-card"><div class="stat-label">Daily Budget</div><div class="stat-value" id="tok-budget">—</div></div>
+        <div class="stat-card"><div class="stat-label">Budget Used</div><div class="stat-value" id="tok-pct">—</div></div>
+      </div>
+      <div class="chart-container">
+        <canvas id="tokenChart"></canvas>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
