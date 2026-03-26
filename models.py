@@ -2,8 +2,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict
 from enum import Enum
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class MarketCategory(str, Enum):
@@ -53,11 +57,11 @@ class MarketSnapshot:
     is_resolved: bool
     resolution_outcome: Optional[str]  # "YES", "NO", or None
     tags: List[str]
-    fetched_at: datetime = field(default_factory=datetime.utcnow)
+    fetched_at: datetime = field(default_factory=_utcnow)
 
     @property
     def days_to_resolve(self) -> float:
-        delta = self.end_date - datetime.utcnow()
+        delta = self.end_date - _utcnow()
         return max(0.0, delta.total_seconds() / 86400)
 
     @property
@@ -82,7 +86,7 @@ class ResearchResult:
     key_facts: List[str]
     tokens_used: int
     model_used: str
-    researched_at: datetime = field(default_factory=datetime.utcnow)
+    researched_at: datetime = field(default_factory=_utcnow)
 
 
 @dataclass
@@ -95,7 +99,7 @@ class ProbabilityEstimate:
     key_factors: List[str]
     model_version: str
     tokens_used: int
-    estimated_at: datetime = field(default_factory=datetime.utcnow)
+    estimated_at: datetime = field(default_factory=_utcnow)
 
 
 @dataclass
@@ -128,7 +132,7 @@ class Bet:
     bet_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     is_paper: bool = True
     status: BetStatus = BetStatus.OPEN
-    placed_at: datetime = field(default_factory=datetime.utcnow)
+    placed_at: datetime = field(default_factory=_utcnow)
     resolved_at: Optional[datetime] = None
     pnl: Optional[float] = None
     resolution_outcome: Optional[str] = None
@@ -158,7 +162,7 @@ class LearningParams:
     calibration_bias: float = 0.0         # systematic over/under confidence
     total_resolved: int = 0
     version: int = 1
-    last_updated: datetime = field(default_factory=datetime.utcnow)
+    last_updated: datetime = field(default_factory=_utcnow)
 
 
 @dataclass
@@ -174,4 +178,4 @@ class PortfolioState:
     num_losses: int
     win_rate: float
     roi_pct: float
-    snapshot_at: datetime = field(default_factory=datetime.utcnow)
+    snapshot_at: datetime = field(default_factory=_utcnow)

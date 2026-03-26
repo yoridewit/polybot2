@@ -6,7 +6,11 @@ and exposes portfolio state for reporting and learning.
 """
 from __future__ import annotations
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 from typing import List, Optional
 
 import config
@@ -189,7 +193,7 @@ def print_portfolio_summary() -> None:
     p = get_portfolio_state()
     db.save_portfolio_snapshot(p)
     logger.info("=" * 60)
-    logger.info(f"PORTFOLIO SUMMARY @ {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}")
+    logger.info(f"PORTFOLIO SUMMARY @ {_utcnow().strftime('%Y-%m-%d %H:%M UTC')}")
     logger.info(f"  Cash:        ${p.cash_balance:>10.2f}")
     logger.info(f"  Open bets:   ${p.open_bets_value:>10.2f}  ({p.num_open_bets} bets)")
     logger.info(f"  Total value: ${p.total_value:>10.2f}")

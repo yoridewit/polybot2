@@ -12,7 +12,11 @@ from __future__ import annotations
 import json
 import logging
 import time
-from datetime import datetime
+from datetime import datetime, timezone
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 from typing import List, Optional, Tuple
 
 import requests
@@ -44,7 +48,7 @@ def _log_tokens(tier: str, model: str, usage) -> None:
 def _search_duckduckgo(query: str, max_results: int = 5) -> List[str]:
     """DuckDuckGo search — completely free, no API key."""
     try:
-        from duckduckgo_search import DDGS
+        from ddgs import DDGS
         with DDGS() as ddgs:
             results = list(ddgs.text(query, max_results=max_results))
         snippets = []
@@ -251,6 +255,11 @@ Provide a factual summary and list of key facts that affect the probability of Y
         tokens = response.usage.input_tokens + response.usage.output_tokens
 
         text = response.content[0].text.strip()
+        if text.startswith("```"):
+            text = "\n".join(
+                line for line in text.splitlines()
+                if not line.strip().startswith("```")
+            ).strip()
         start = text.find("{")
         end = text.rfind("}") + 1
         data = json.loads(text[start:end])
@@ -272,7 +281,7 @@ def _needs_research(market: MarketSnapshot) -> bool:
         return True
     try:
         researched_at = datetime.fromisoformat(row["researched_at"])
-        hours_since = (datetime.utcnow() - researched_at).total_seconds() / 3600
+        hours_since = (_utcnow() - researched_at).total_seconds() / 3600
         if hours_since < config.RESEARCH_CACHE_HOURS:
             mrow = db.get_market(market.condition_id)
             if mrow:

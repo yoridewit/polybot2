@@ -104,9 +104,16 @@ def estimate_probability(
         total_tokens = response.usage.input_tokens + response.usage.output_tokens
 
         text = response.content[0].text.strip()
+        # Strip markdown code fences (```json ... ``` or ``` ... ```)
+        if text.startswith("```"):
+            text = "\n".join(
+                line for line in text.splitlines()
+                if not line.strip().startswith("```")
+            ).strip()
         start = text.find("{")
         end = text.rfind("}") + 1
         if start == -1 or end == 0:
+            logger.error(f"No JSON in response for {market.condition_id}: {text[:300]}")
             raise ValueError("No JSON object in response")
         data = json.loads(text[start:end])
 

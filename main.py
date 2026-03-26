@@ -7,7 +7,11 @@ Main loop: scan → research → estimate → size → bet → sleep
 from __future__ import annotations
 import logging
 import time
-from datetime import datetime
+from datetime import datetime, timezone
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 import anthropic
 
@@ -33,7 +37,7 @@ logger = logging.getLogger("polybot2")
 def run_cycle(anthropic_client) -> None:
     """Execute one full scan-research-bet cycle."""
     logger.info("=" * 60)
-    logger.info(f"CYCLE START | {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}")
+    logger.info(f"CYCLE START | {_utcnow().strftime('%Y-%m-%d %H:%M UTC')}")
 
     learning_params = db.load_learning_params()
     logger.info(
